@@ -1,8 +1,8 @@
 const { createClient } = supabase;
 
-const supabaseUrl = "https://jaxnufmqpegezmovpaur.supabase.co";
-const supabaseKey = "sb_publishable_ie_p8CqCoGbO7gqkB7oenw_Hzs1vPem";
+// Use values from supabaseConfig.js
 const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
 
 // --- Create a new list group ---
 async function createListGroup() {

@@ -1,11 +1,7 @@
-// Import the Supabase client from the global script we added in index.html
 const { createClient } = supabase;
 
-// Replace these with your actual Supabase project credentials
-const supabaseUrl = "https://YOUR_PROJECT_URL.supabase.co";
-const supabaseKey = "YOUR_PUBLIC_ANON_KEY";
-
-// Create a Supabase client instance
+const supabaseUrl = "https://jaxnufmqpegezmovpaur.supabase.co";
+const supabaseKey = "sb_publishable_ie_p8CqCoGbO7gqkB7oenw_Hzs1vPem";
 const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
 // --- Create a new list group ---
@@ -18,13 +14,14 @@ async function createListGroup() {
 
   const { data, error } = await supabaseClient
     .from("item_group")
-    .insert([{ list_name: listName }]);
+    .insert([{ list_name: listName }])
+    .select(); // return inserted row(s)
 
   if (error) {
-    console.error("Error creating list:", error.message);
+    console.error("❌ Error creating list:", error.message);
     alert("Failed to create list.");
   } else {
-    console.log("List created:", data);
+    console.log("✅ List created successfully:", data);
     alert("List created successfully!");
   }
 }
@@ -41,12 +38,21 @@ async function addItem() {
     return;
   }
 
-  // For now, we’ll just insert into the first list created (later we’ll select list_id dynamically)
-  const { data: lists } = await supabaseClient.from("item_group").select("list_id").limit(1);
+  // For now, use the first list created
+  const { data: lists, error: listError } = await supabaseClient
+    .from("item_group")
+    .select("list_id")
+    .limit(1);
+
+  if (listError) {
+    console.error("❌ Error fetching list:", listError.message);
+    return;
+  }
   if (!lists || lists.length === 0) {
     alert("No list found. Please create a list first.");
     return;
   }
+
   const listId = lists[0].list_id;
 
   const { data, error } = await supabaseClient
@@ -57,13 +63,14 @@ async function addItem() {
       item_category: category,
       item_count: count,
       item_price: price
-    }]);
+    }])
+    .select(); // return inserted row(s)
 
   if (error) {
-    console.error("Error adding item:", error.message);
+    console.error("❌ Error adding item:", error.message);
     alert("Failed to add item.");
   } else {
-    console.log("Item added:", data);
+    console.log("✅ Item added successfully:", data);
     alert("Item added successfully!");
   }
 }

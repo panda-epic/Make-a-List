@@ -10,13 +10,13 @@
 <body>
   <h1>My Shopping List</h1>
 
-  <!-- Input for list group name -->
+  <!-- Create a new list group -->
   <input id="listNameInput" type="text" placeholder="Enter list group name">
   <button id="createListBtn">Create List</button>
 
   <hr>
 
-  <!-- Input for items -->
+  <!-- Add items -->
   <input id="itemInput" type="text" placeholder="Add an item">
   <select id="categoryInput">
     <option value="Grocery">Grocery</option>
@@ -30,9 +30,15 @@
   <input id="priceInput" type="number" placeholder="Price" step="0.01">
   <button id="addItemBtn">Add Item</button>
 
+  <hr>
+
+  <!-- Fetch items by list group name -->
+  <input id="fetchListNameInput" type="text" placeholder="Enter list group name to fetch">
+  <button id="fetchListBtn">Fetch List</button>
+
+  <!-- Display items here -->
   <ul id="list"></ul>
 
-  <!-- Your custom script -->
   <script src="script.js"></script>
 </body>
 </html>

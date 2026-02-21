@@ -7,6 +7,8 @@ const supabaseClient = createClient(supabaseUrl, supabaseKey);
 // --- Create a new list group ---
 async function createListGroup() {
   const listName = document.getElementById("listNameInput").value.trim();
+  const isShared = document.getElementById("sharedToggle").checked; // true/false
+
   if (!listName) {
     alert("Please enter a list name.");
     return;
@@ -14,18 +16,19 @@ async function createListGroup() {
 
   const { data, error } = await supabaseClient
     .from("item_group")
-    .insert([{ list_name: listName }])
+    .insert([{ list_name: listName, is_shared: isShared }])
     .select();
 
   if (error) {
     console.error("❌ Error creating list:", error.message);
+    alert("Failed to create list.");
   } else {
     console.log("✅ List created:", data);
-    alert("List created successfully!");
+    alert(`List "${listName}" created successfully! Shared: ${isShared}`);
   }
 }
 
-// --- Add a new item to the first list ---
+// --- Add a new item linked to a group ---
 async function addItem() {
   const itemName = document.getElementById("itemInput").value.trim();
   const category = document.getElementById("categoryInput").value;
@@ -37,9 +40,11 @@ async function addItem() {
     return;
   }
 
+  // Ensure at least one group exists
   const { data: lists, error: listError } = await supabaseClient
     .from("item_group")
-    .select("list_id")
+    .select("list_id, list_name")
+    .order("created_at", { ascending: false }) // get latest group
     .limit(1);
 
   if (listError) {
@@ -47,7 +52,8 @@ async function addItem() {
     return;
   }
   if (!lists || lists.length === 0) {
-    alert("No list found. Please create a list first.");
+    alert("No item group found. Please create a group first.");
+    console.error("❌ No item group exists.");
     return;
   }
 
@@ -66,9 +72,10 @@ async function addItem() {
 
   if (error) {
     console.error("❌ Error adding item:", error.message);
+    alert("Failed to add item.");
   } else {
-    console.log("✅ Item added:", data);
-    alert("Item added successfully!");
+    console.log(`✅ Item "${itemName}" added to group "${lists[0].list_name}":`, data);
+    alert(`Item "${itemName}" added successfully to group "${lists[0].list_name}"!`);
   }
 }
 

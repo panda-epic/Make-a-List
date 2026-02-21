@@ -15,18 +15,17 @@ async function createListGroup() {
   const { data, error } = await supabaseClient
     .from("item_group")
     .insert([{ list_name: listName }])
-    .select(); // return inserted row(s)
+    .select();
 
   if (error) {
     console.error("❌ Error creating list:", error.message);
-    alert("Failed to create list.");
   } else {
-    console.log("✅ List created successfully:", data);
+    console.log("✅ List created:", data);
     alert("List created successfully!");
   }
 }
 
-// --- Add a new item to the list ---
+// --- Add a new item to the first list ---
 async function addItem() {
   const itemName = document.getElementById("itemInput").value.trim();
   const category = document.getElementById("categoryInput").value;
@@ -38,7 +37,6 @@ async function addItem() {
     return;
   }
 
-  // For now, use the first list created
   const { data: lists, error: listError } = await supabaseClient
     .from("item_group")
     .select("list_id")
@@ -64,17 +62,66 @@ async function addItem() {
       item_count: count,
       item_price: price
     }])
-    .select(); // return inserted row(s)
+    .select();
 
   if (error) {
     console.error("❌ Error adding item:", error.message);
-    alert("Failed to add item.");
   } else {
-    console.log("✅ Item added successfully:", data);
+    console.log("✅ Item added:", data);
     alert("Item added successfully!");
   }
+}
+
+// --- Fetch items by list group name ---
+async function fetchList() {
+  const listName = document.getElementById("fetchListNameInput").value.trim();
+  if (!listName) {
+    alert("Please enter a list group name.");
+    return;
+  }
+
+  // Find the list_id for the given name
+  const { data: listData, error: listError } = await supabaseClient
+    .from("item_group")
+    .select("list_id")
+    .eq("list_name", listName)
+    .limit(1);
+
+  if (listError) {
+    console.error("❌ Error fetching list group:", listError.message);
+    return;
+  }
+  if (!listData || listData.length === 0) {
+    alert("No list found with that name.");
+    return;
+  }
+
+  const listId = listData[0].list_id;
+
+  // Fetch items for that list_id
+  const { data: items, error: itemsError } = await supabaseClient
+    .from("items_list")
+    .select("*")
+    .eq("list_id", listId);
+
+  if (itemsError) {
+    console.error("❌ Error fetching items:", itemsError.message);
+    return;
+  }
+
+  console.log("✅ Items fetched:", items);
+
+  // Render items in the <ul>
+  const listElement = document.getElementById("list");
+  listElement.innerHTML = ""; // clear old items
+  items.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = `${item.item_name} (${item.item_category}) - Count: ${item.item_count}, Price: ${item.item_price ?? "N/A"}`;
+    listElement.appendChild(li);
+  });
 }
 
 // --- Bind buttons ---
 document.getElementById("createListBtn").addEventListener("click", createListGroup);
 document.getElementById("addItemBtn").addEventListener("click", addItem);
+document.getElementById("fetchListBtn").addEventListener("click", fetchList);

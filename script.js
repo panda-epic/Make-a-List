@@ -1,13 +1,23 @@
-document.getElementById("addBtn").addEventListener("click", addItem);
+// Import the Supabase client from the global script we added in index.html
+const { createClient } = supabase;
 
-function addItem() {
-  const input = document.getElementById("itemInput");
-  const list = document.getElementById("list");
+// Replace these with your actual Supabase project credentials
+const supabaseUrl = "https://jaxnufmqpegezmovpaur.supabase.co";
+const supabaseKey = "sb_publishable_ie_p8CqCoGbO7gqkB7oenw_Hzs1vPem";
 
-  if (input.value.trim() !== "") {
-    const li = document.createElement("li");
-    li.textContent = input.value;
-    list.appendChild(li);
-    input.value = "";
+// Create a Supabase client instance
+const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+// --- Test the connection ---
+// This will just log something to the console so you know it’s working
+async function testConnection() {
+  const { data, error } = await supabaseClient.from("item_group").select("*").limit(1);
+  if (error) {
+    console.error("Supabase connection error:", error.message);
+  } else {
+    console.log("Supabase connection successful. Sample data:", data);
   }
 }
+
+// Run the test when the page loads
+window.onload = testConnection;

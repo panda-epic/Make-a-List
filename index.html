@@ -2,15 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Make a List!</title>
+  <title>Shopping List</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Supabase client library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <h1>Happy Monthsary Suag'r</h1>
-  <input id="itemInput" type="text" placeholder="I Love you">
-  <button id="addBtn">Add</button>
+  <h1>My Shopping List</h1>
+
+  <!-- Input for list group name -->
+  <input id="listNameInput" type="text" placeholder="Enter list group name">
+  <button id="createListBtn">Create List</button>
+
+  <hr>
+
+  <!-- Input for items -->
+  <input id="itemInput" type="text" placeholder="Add an item">
+  <select id="categoryInput">
+    <option value="Grocery">Grocery</option>
+    <option value="Shopping">Shopping</option>
+    <option value="To Buy">To Buy</option>
+    <option value="Dine-in">Dine-in</option>
+    <option value="Take-outs">Take-outs</option>
+    <option value="Custom">Custom</option>
+  </select>
+  <input id="countInput" type="number" placeholder="Count" min="1" value="1">
+  <input id="priceInput" type="number" placeholder="Price" step="0.01">
+  <button id="addItemBtn">Add Item</button>
+
   <ul id="list"></ul>
 
+  <!-- Your custom script -->
   <script src="script.js"></script>
 </body>
 </html>

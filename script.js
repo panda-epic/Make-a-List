@@ -3,11 +3,38 @@ const { createClient } = supabase;
 // Use values from supabaseConfig.js
 const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
+// --- Populate group dropdown ---
+async function loadGroups() {
+  const { data, error } = await supabaseClient
+    .from("item_group")
+    .select("list_id, list_name");
+
+  const groupSelect = document.getElementById("groupSelect");
+  groupSelect.innerHTML = '<option value="">-- Select a group --</option>';
+
+  if (error) {
+    console.error("❌ Error loading groups:", error.message);
+    return;
+  }
+
+  if (data.length > 0) {
+    groupSelect.disabled = false;
+    data.forEach(group => {
+      const option = document.createElement("option");
+      option.value = group.list_id;
+      option.textContent = group.list_name;
+      groupSelect.appendChild(option);
+    });
+  } else {
+    groupSelect.disabled = true;
+    document.getElementById("addItemBtn").disabled = true;
+  }
+}
 
 // --- Create a new list group ---
 async function createListGroup() {
   const listName = document.getElementById("listNameInput").value.trim();
-  const isShared = document.getElementById("sharedToggle").checked; // true/false
+  const isShared = document.getElementById("sharedToggle").checked;
 
   if (!listName) {
     alert("Please enter a list name.");
@@ -25,20 +52,51 @@ async function createListGroup() {
   } else {
     console.log("✅ List created:", data);
     alert(`List "${listName}" created successfully! Shared: ${isShared}`);
+    loadGroups(); // refresh dropdown
   }
 }
 
-// --- Add a new item linked to a group ---
+// --- Add a new item linked to selected group ---
 async function addItem() {
   const itemName = document.getElementById("itemInput").value.trim();
   const category = document.getElementById("categoryInput").value;
   const count = parseInt(document.getElementById("countInput").value) || 1;
   const price = parseFloat(document.getElementById("priceInput").value) || null;
+  const listId = document.getElementById("groupSelect").value;
 
+  if (!listId) {
+    alert("Please select a group first.");
+    return;
+  }
   if (!itemName) {
     alert("Please enter an item name.");
     return;
   }
+
+  const { data, error } = await supabaseClient
+    .from("items_list")
+    .insert([{
+      list_id: listId,
+      item_name: itemName,
+      item_category: category,
+      item_count: count,
+      item_price: price
+    }])
+    .select();
+
+  if (error) {
+    console.error("❌ Error adding item:", error.message);
+    alert("Failed to add item.");
+  } else {
+    console.log(`✅ Item "${itemName}" added to group:`, data);
+    alert(`Item "${itemName}" added successfully!`);
+  }
+}
+
+// --- Enable Add Item button when group selected ---
+document.getElementById("groupSelect").addEventListener("change", function() {
+  document.getElementById("addItemBtn").disabled = !this.value;
+});
 
   // Ensure at least one group exists
   const { data: lists, error: listError } = await supabaseClient
@@ -132,3 +190,13 @@ async function fetchList() {
 document.getElementById("createListBtn").addEventListener("click", createListGroup);
 document.getElementById("addItemBtn").addEventListener("click", addItem);
 document.getElementById("fetchListBtn").addEventListener("click", fetchList);
+
+// --- Load groups on page load ---
+window.onload = loadGroups;
+
+// -- new --
+
+
+
+
+

@@ -93,6 +93,7 @@ async function addItem() {
   }
 }
 
+
 // --- Enable Add Item button when group selected ---
 document.getElementById("groupSelect").addEventListener("change", function() {
   document.getElementById("addItemBtn").disabled = !this.value;

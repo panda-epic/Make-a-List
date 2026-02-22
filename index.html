@@ -15,10 +15,13 @@
   <!-- Toast container -->
   <div id="toastContainer" class="toast-container"></div>
 
+  <!-- Mobile sidebar backdrop -->
+  <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+
   <div class="app-shell">
 
     <!-- ===== SIDEBAR ===== -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
 
       <div class="sidebar-logo">
         <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
@@ -26,6 +29,12 @@
           <path d="M7 9h12M7 13h9M7 17h11" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round"/>
         </svg>
         <span>Listify</span>
+        <!-- Close button (mobile only) -->
+        <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close menu">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
       </div>
 
       <!-- Auth form (shown when logged out) -->
@@ -82,6 +91,10 @@
     <main class="main">
 
       <div class="topbar">
+        <!-- Hamburger (mobile only) -->
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
         <div class="topbar-left">
           <h1 class="page-title" id="activeListTitle">My Shopping List</h1>
           <p class="page-subtitle" id="activeListSubtitle">Select a list from the sidebar</p>
@@ -152,5 +165,34 @@
   </div>
 
   <script src="script.js"></script>
+  <script>
+    const sidebar       = document.getElementById('sidebar');
+    const backdrop      = document.getElementById('sidebarBackdrop');
+    const hamburgerBtn  = document.getElementById('hamburgerBtn');
+    const closeBtn      = document.getElementById('sidebarCloseBtn');
+
+    function openSidebar() {
+      sidebar.classList.add('sidebar-open');
+      backdrop.classList.add('backdrop-visible');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('sidebar-open');
+      backdrop.classList.remove('backdrop-visible');
+      document.body.style.overflow = '';
+    }
+
+    hamburgerBtn.addEventListener('click', openSidebar);
+    closeBtn.addEventListener('click', closeSidebar);
+    backdrop.addEventListener('click', closeSidebar);
+
+    // Close sidebar when a group tab is clicked on mobile
+    document.getElementById('groupTabs').addEventListener('click', (e) => {
+      if (window.innerWidth <= 700 && e.target.closest('.group-tab')) {
+        closeSidebar();
+      }
+    });
+  </script>
 </body>
 </html>

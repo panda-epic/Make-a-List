@@ -2,52 +2,154 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Shopping List</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listify</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Supabase client library -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Config file with URL and Key -->
   <script src="supabaseConfig.js"></script>
 </head>
 <body>
-  <h1>My Shopping List</h1>
 
-  <!-- Create a new list group -->
-  <input id="listNameInput" type="text" placeholder="Enter list group name">
-  <label>
-    <input id="sharedToggle" type="checkbox"> Shared?
-  </label>
-  <button id="createListBtn">Create List</button>
+  <!-- Toast container -->
+  <div id="toastContainer" class="toast-container"></div>
 
-  <hr>
+  <div class="app-shell">
 
-  <!-- Select item group before adding items -->
-  <select id="groupSelect" disabled>
-    <option value="">-- Select a group --</option>
-  </select>
-  
-  <!-- Add items -->
-  <input id="itemInput" type="text" placeholder="Add an item">
-  <select id="categoryInput">
-    <option value="Grocery">Grocery</option>
-    <option value="Shopping">Shopping</option>
-    <option value="To Buy">To Buy</option>
-    <option value="Dine-in">Dine-in</option>
-    <option value="Take-outs">Take-outs</option>
-    <option value="Custom">Custom</option>
-  </select>
-  <input id="countInput" type="number" placeholder="Count" min="1" value="1">
-  <input id="priceInput" type="number" placeholder="Price" step="0.01">
-  <button id="addItemBtn">Add Item</button>
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar">
 
-  <hr>
+      <div class="sidebar-logo">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+          <rect width="26" height="26" rx="7" fill="#a8ff78"/>
+          <path d="M7 9h12M7 13h9M7 17h11" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>Listify</span>
+      </div>
 
-  <!-- Fetch items by list group name -->
-  <input id="fetchListNameInput" type="text" placeholder="Enter list group name to fetch">
-  <button id="fetchListBtn">Fetch List</button>
+      <!-- Auth form (shown when logged out) -->
+      <div id="authForm" class="sidebar-section">
+        <p class="section-label">Account</p>
+        <input id="emailInput" type="email" placeholder="Email address">
+        <input id="passwordInput" type="password" placeholder="Password">
+        <div class="btn-row">
+          <button id="signInBtn" class="btn btn-primary">Sign In</button>
+          <button id="signUpBtn" class="btn btn-ghost">Sign Up</button>
+        </div>
+        <!-- signOutBtn must always exist in DOM for script.js -->
+        <button id="signOutBtn" class="btn btn-danger" disabled style="display:none">Sign Out</button>
+        <p id="userInfo" class="user-info-text"></p>
+      </div>
 
-  <!-- Display items here -->
-  <ul id="list"></ul>
+      <!-- User card (shown when logged in) -->
+      <div id="userCard" class="sidebar-section user-card" style="display:none">
+        <p class="section-label">Account</p>
+        <div class="user-card-inner">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div class="user-details">
+            <p class="user-email" id="userEmail"></p>
+            <button id="signOutBtn2" class="btn-inline-link">Sign out</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <!-- Create List -->
+      <div class="sidebar-section">
+        <p class="section-label">New List</p>
+        <input id="listNameInput" type="text" placeholder="List name…">
+        <label class="toggle-row">
+          <input id="sharedToggle" type="checkbox" class="toggle-checkbox">
+          <span class="toggle-switch"></span>
+          <span class="toggle-text">Shared list</span>
+        </label>
+        <button id="createListBtn" class="btn btn-accent" disabled>+ Create List</button>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <!-- Group Tabs -->
+      <div class="sidebar-section sidebar-groups">
+        <p class="section-label">My Lists</p>
+        <div id="groupTabs" class="group-tabs"></div>
+      </div>
+
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <main class="main">
+
+      <div class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title" id="activeListTitle">My Shopping List</h1>
+          <p class="page-subtitle" id="activeListSubtitle">Select a list from the sidebar</p>
+        </div>
+        <select id="groupSelect" disabled class="select-styled">
+          <option value="">— Select a list —</option>
+        </select>
+      </div>
+
+      <div class="add-item-bar">
+        <input id="itemInput" type="text" placeholder="Add an item…" class="flex-grow">
+        <select id="categoryInput" class="select-styled">
+          <option value="Grocery">🛒 Grocery</option>
+          <option value="Shopping">🛍️ Shopping</option>
+          <option value="To Buy">📦 To Buy</option>
+          <option value="Dine-in">🍽️ Dine-in</option>
+          <option value="Take-outs">🥡 Take-outs</option>
+          <option value="Custom">✏️ Custom</option>
+        </select>
+        <input id="countInput" type="number" placeholder="Qty" min="1" value="1" class="input-narrow">
+        <input id="priceInput" type="number" placeholder="Price" step="0.01" class="input-narrow">
+        <button id="addItemBtn" class="btn btn-accent" disabled>Add Item</button>
+      </div>
+
+      <!-- Summary bar -->
+      <div id="listSummary" class="list-summary" style="display:none">
+        <div class="summary-totals">
+          <div class="summary-card summary-card-main">
+            <span class="summary-label">Total Items</span>
+            <span class="summary-value" id="summaryTotalItems">0</span>
+          </div>
+          <div class="summary-card summary-card-main">
+            <span class="summary-label">Total Price</span>
+            <span class="summary-value" id="summaryTotalPrice">$0.00</span>
+          </div>
+        </div>
+        <div class="summary-categories" id="summaryCategories"></div>
+      </div>
+
+      <!-- Items list — script.js appends <li> elements here -->
+      <ul id="list" class="items-list"></ul>
+
+      <!-- Empty state — shown when a list is selected but has no items -->
+      <div id="emptyState" class="empty-state" style="display:none">
+        <div class="empty-icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="24" fill="#1e1e1e"/>
+            <path d="M14 18h20M14 24h14M14 30h17" stroke="#a8ff78" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p class="empty-title">This list is empty</p>
+        <p class="empty-sub">Add your first item using the bar above.</p>
+      </div>
+
+      <!-- No list selected state -->
+      <div id="noListState" class="empty-state">
+        <div class="empty-icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="24" fill="#1e1e1e"/>
+            <path d="M16 24h16M24 16v16" stroke="#555" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p class="empty-title">No list selected</p>
+        <p class="empty-sub">Pick a list from the sidebar or create a new one.</p>
+      </div>
+
+    </main>
+  </div>
 
   <script src="script.js"></script>
 </body>

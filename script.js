@@ -1,6 +1,4 @@
 const { createClient } = supabase;
-
-// Use values from supabaseConfig.js
 const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
 // --- Populate group dropdown ---
@@ -93,51 +91,6 @@ async function addItem() {
   }
 }
 
-
-// --- Enable Add Item button when group selected ---
-document.getElementById("groupSelect").addEventListener("change", function() {
-  document.getElementById("addItemBtn").disabled = !this.value;
-});
-
-// Ensure at least one group exists
-const { data: lists, error: listError } = await supabaseClient
-  .from("item_group")
-  .select("list_id, list_name")
-  .order("created_at", { ascending: false }) // get latest group
-  .limit(1);
-
-if (listError) {
-  console.error("❌ Error fetching list:", listError.message);
-  return;
-}
-if (!lists || lists.length === 0) {
-  alert("No item group found. Please create a group first.");
-  console.error("❌ No item group exists.");
-  return;
-}
-
-const listId = lists[0].list_id;
-
-const { data, error } = await supabaseClient
-  .from("items_list")
-  .insert([{
-    list_id: listId,
-    item_name: itemName,
-    item_category: category,
-    item_count: count,
-    item_price: price
-  }])
-  .select();
-
-if (error) {
-  console.error("❌ Error adding item:", error.message);
-  alert("Failed to add item.");
-} else {
-  console.log(`✅ Item "${itemName}" added to group "${lists[0].list_name}":`, data);
-  alert(`Item "${itemName}" added successfully to group "${lists[0].list_name}"!`);
-}
-
-
 // --- Fetch items by list group name ---
 async function fetchList() {
   const listName = document.getElementById("fetchListNameInput").value.trim();
@@ -186,6 +139,11 @@ async function fetchList() {
     listElement.appendChild(li);
   });
 }
+
+// --- Enable Add Item button when group selected ---
+document.getElementById("groupSelect").addEventListener("change", function() {
+  document.getElementById("addItemBtn").disabled = !this.value;
+});
 
 // --- Bind buttons ---
 document.getElementById("createListBtn").addEventListener("click", createListGroup);

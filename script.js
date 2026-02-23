@@ -319,7 +319,7 @@ async function deleteListGroup(listId, listName) {
   const { error: itemsError } = await supabaseClient
     .from('items_list')
     .delete()
-    .eq('list_id', listId);
+    .eq('item_id', itemId);
 
   if (itemsError) {
     console.error('❌ Error deleting items:', itemsError.message);

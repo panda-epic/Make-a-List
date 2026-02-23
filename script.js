@@ -409,7 +409,6 @@ async function deleteItem(itemId, itemName, listId) {
   } else {
     console.log('✅ Item deleted:', itemId);
     showToast(`"${itemName}" removed.`, 'info');
-    currentListId = item.list_id;
     fetchList();
   }
 }

@@ -409,7 +409,7 @@ async function deleteItem(itemId, itemName, listId) {
   } else {
     console.log('✅ Item deleted:', itemId);
     showToast(`"${itemName}" removed.`, 'info');
-    fetchList();
+    fetchList(listId);
   }
 }
 
@@ -450,7 +450,7 @@ async function fetchList(listId) {
       <button class="item-delete-btn" title="Remove item">✕</button>
     `;
     li.querySelector('.item-delete-btn').addEventListener('click', () => {
-      deleteItem(item.item_id, item.item_name, item.list_id);
+      deleteItem(item.item_id, item.item_name, activeListId);
     });
     listElement.appendChild(li);
   });

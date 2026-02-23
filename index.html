@@ -193,6 +193,22 @@
         closeSidebar();
       }
     });
+
+    // Close sidebar when a list is selected from dropdown (mobile)
+    document.getElementById('groupSelect').addEventListener('change', function () {
+      if (window.innerWidth <= 700 && this.value) {
+        closeSidebar();
+      }
+    });
+
+    // Failsafe: always reset body overflow when sidebar is closed (in case of errors)
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 700) {
+        document.body.style.overflow = '';
+        document.getElementById('sidebar').classList.remove('sidebar-open');
+        document.getElementById('sidebarBackdrop').classList.remove('backdrop-visible');
+      }
+    });
   </script>
 </body>
 </html>

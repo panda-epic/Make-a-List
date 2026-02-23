@@ -34,6 +34,8 @@ html, body {
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  touch-action: manipulation;
+  overscroll-behavior-y: contain;
 }
 
 /* =============================================
@@ -824,7 +826,7 @@ input:disabled,
 
   /* Show hamburger & close btn */
   .hamburger-btn       { display: flex; }
-  .sidebar-close-btn   { display: flex; }
+  .sidebar-close-btn   { display: flex; z-index: 101; }
 
   /* Show backdrop */
   .sidebar-backdrop    { display: block; }

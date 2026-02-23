@@ -621,6 +621,20 @@ input:disabled,
 }
 
 /* =============================================
+   SIDEBAR PULL TAB — hidden on desktop
+   ============================================= */
+.sidebar-pull-tab {
+  display: none;
+}
+
+/* =============================================
+   MOBILE ADD BAR — hidden on desktop
+   ============================================= */
+.mobile-add-bar {
+  display: none;
+}
+
+/* =============================================
    SCROLLBAR
    ============================================= */
 ::-webkit-scrollbar { width: 5px; }
@@ -628,21 +642,352 @@ input:disabled,
 ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 4px; }
 
 /* =============================================
-   RESPONSIVE
+   HAMBURGER & MOBILE SIDEBAR
+   ============================================= */
+
+/* Hamburger button — hidden on desktop */
+.hamburger-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.15s, background 0.15s;
+}
+.hamburger-btn:hover {
+  background: var(--surface-2);
+  border-color: var(--border-2);
+}
+.hamburger-btn span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+/* Sidebar close button — hidden on desktop */
+.sidebar-close-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  padding: 6px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.sidebar-close-btn:hover {
+  color: var(--text);
+  border-color: var(--border-2);
+}
+
+/* Backdrop */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 99;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+.sidebar-backdrop.backdrop-visible {
+  opacity: 1;
+}
+
+/* =============================================
+   MOBILE OVERRIDES  (≤ 700px)
    ============================================= */
 @media (max-width: 700px) {
-  .app-shell { flex-direction: column; }
-  .sidebar {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    max-height: 55vh;
+
+  /* ── Layout ── */
+  .app-shell {
+    flex-direction: row;
+    height: 100dvh;
+    overflow: hidden;
   }
-  .topbar { padding: 16px; flex-direction: column; align-items: flex-start; }
-  .topbar .select-styled { width: 100%; }
-  .add-item-bar { padding: 12px 16px; }
-  .items-list { padding: 16px; }
-  .toast-container { bottom: 16px; right: 16px; left: 16px; }
+
+  .main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    /* leave room at bottom for sticky add bar */
+    padding-bottom: 0;
+  }
+
+  /* ── Sidebar drawer ── */
+  .hamburger-btn       { display: flex; }
+  .sidebar-close-btn   { display: flex; z-index: 101; }
+  .sidebar-backdrop    { display: block; }
+
+  /* ── Sidebar pull tab — permanent left-edge affordance ── */
+  .sidebar-pull-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 101;
+    width: 20px;
+    height: 52px;
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-left: none;
+    border-radius: 0 var(--r-sm) var(--r-sm) 0;
+    color: var(--text-3);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+  }
+
+  .sidebar-pull-tab svg {
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+  }
+
+  /* When sidebar is open, tab shifts right and arrow flips */
+  .sidebar-pull-tab.sidebar-open {
+    left: min(80vw, 300px);
+    color: var(--accent);
+    background: var(--surface-2);
+  }
+
+  .sidebar-pull-tab.sidebar-open svg {
+    transform: rotate(180deg);
+  }
+
+  .sidebar-pull-tab:active {
+    background: var(--surface-3);
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100dvh;
+    width: 80vw;
+    max-width: 300px;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    border-right: 1px solid var(--border-2);
+    border-bottom: none;
+    max-height: unset;
+  }
+
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  /* ── Topbar ── */
+  .topbar {
+    padding: 10px 12px;
+    gap: 8px;
+    flex-wrap: nowrap;
+    align-items: center;
+    flex-direction: row;
+    flex-shrink: 0;
+  }
+
+  .topbar-left {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .page-title {
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .page-subtitle {
+    font-size: 11px;
+  }
+
+  /* Hide the list-select dropdown on mobile — sidebar handles it */
+  .topbar-select {
+    display: none !important;
+  }
+
+  /* ── Desktop add-item bar — hidden on mobile ── */
+  .add-item-bar-desktop {
+    display: none !important;
+  }
+
+  /* ── Scrollable middle area ── */
+  .list-summary {
+    padding: 8px 12px 0;
+    flex-shrink: 0;
+    max-height: 30vh;
+    overflow-y: auto;
+  }
+
+  /* Summary totals: compact side-by-side */
+  .summary-totals {
+    gap: 6px;
+  }
+
+  .summary-card {
+    padding: 7px 12px;
+    border-radius: var(--r-sm);
+  }
+
+  .summary-label {
+    font-size: 9px;
+    letter-spacing: 0.8px;
+  }
+
+  .summary-value {
+    font-size: 15px;
+    letter-spacing: -0.3px;
+  }
+
+  /* Category cards: horizontal compact rows */
+  .summary-categories {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .summary-cat-card {
+    min-width: unset;
+    padding: 5px 10px;
+    gap: 7px;
+    border-radius: var(--r-sm);
+  }
+
+  .summary-cat-emoji { font-size: 13px; }
+
+  .summary-cat-name {
+    font-size: 11px;
+  }
+
+  .summary-cat-meta {
+    font-size: 10px;
+  }
+
+  .summary-cat-price {
+    font-size: 11px;
+  }
+
+  /* Items list */
+  .items-list {
+    padding: 8px 12px;
+    padding-bottom: 6px;
+    overflow-y: auto;
+    flex: 1;
+    gap: 5px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ── Item row — compact ── */
+  .items-list li {
+    padding: 9px 10px;
+    gap: 7px;
+    border-radius: var(--r-sm);
+    font-size: 13px;
+  }
+
+  .item-name {
+    font-size: 13px;
+  }
+
+  .item-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .item-meta {
+    font-size: 11px;
+  }
+
+  .empty-state {
+    flex: 1;
+    padding: 30px 20px 100px;
+  }
+
+  /* Always show delete button on mobile (no hover) */
+  .item-delete-btn {
+    opacity: 1 !important;
+    padding: 4px 6px;
+    font-size: 13px;
+  }
+
+  /* ── Mobile sticky add bar ── */
+  .mobile-add-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border-2);
+    padding: 8px 12px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    z-index: 50;
+    flex-shrink: 0;
+  }
+
+  .mobile-add-row-main {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .mobile-add-row-main input {
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+
+  .mobile-add-row-main .btn {
+    padding: 8px 14px;
+    font-size: 13px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .mobile-add-row-extra {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .mobile-add-row-extra .select-styled {
+    flex: 1;
+    font-size: 12px;
+    padding: 7px 8px;
+  }
+
+  .mobile-add-row-extra .input-narrow {
+    width: 60px !important;
+    font-size: 12px;
+    padding: 7px 8px;
+  }
+
+  /* ── Toast ── */
+  .toast-container {
+    bottom: calc(110px + env(safe-area-inset-bottom));
+    right: 16px;
+    left: 16px;
+  }
   .toast { max-width: 100%; }
 }
 
@@ -747,11 +1092,6 @@ input:disabled,
   white-space: nowrap;
 }
 
-@media (max-width: 700px) {
-  .list-summary { padding: 12px 16px 0; }
-  .summary-categories { flex-direction: column; }
-  .summary-cat-card { min-width: unset; }
-}
 
 /* =============================================
    HAMBURGER & MOBILE SIDEBAR
@@ -819,81 +1159,4 @@ input:disabled,
   opacity: 1;
 }
 
-/* =============================================
-   MOBILE OVERRIDES  (≤ 700px)
-   ============================================= */
-@media (max-width: 700px) {
 
-  /* Show hamburger & close btn */
-  .hamburger-btn       { display: flex; }
-  .sidebar-close-btn   { display: flex; z-index: 101; }
-
-  /* Show backdrop */
-  .sidebar-backdrop    { display: block; }
-
-  /* Sidebar becomes a fixed off-canvas drawer */
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100dvh;
-    width: 80vw;
-    max-width: 300px;
-    z-index: 100;
-    transform: translateX(-100%);
-    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-    border-right: 1px solid var(--border-2);
-    /* reset old responsive overrides */
-    border-bottom: none;
-    max-height: unset;
-  }
-
-  .sidebar.sidebar-open {
-    transform: translateX(0);
-  }
-
-  /* Main fills full width */
-  .app-shell {
-    flex-direction: row;
-  }
-
-  .main {
-    width: 100%;
-  }
-
-  /* Topbar on mobile */
-  .topbar {
-    padding: 14px 16px;
-    gap: 10px;
-    flex-wrap: nowrap;
-    align-items: center;
-    flex-direction: row;
-  }
-
-  .topbar .select-styled {
-    width: auto;
-    flex: 1;
-    min-width: 0;
-  }
-
-  /* Add item bar stacks nicely */
-  .add-item-bar {
-    padding: 12px 16px;
-    flex-wrap: wrap;
-  }
-
-  .add-item-bar .select-styled { width: auto; flex: 1; }
-  .input-narrow { width: 70px !important; }
-
-  /* Items list */
-  .items-list { padding: 12px 16px; }
-
-  /* Summary */
-  .list-summary { padding: 12px 16px 0; }
-  .summary-categories { flex-direction: column; }
-  .summary-cat-card { min-width: unset; }
-
-  /* Toast */
-  .toast-container { bottom: 16px; right: 16px; left: 16px; }
-  .toast { max-width: 100%; }
-}

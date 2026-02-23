@@ -102,6 +102,7 @@ function enableAppFeatures() {
   document.getElementById('createListBtn').disabled = false;
   document.getElementById('groupSelect').disabled = false;
   document.getElementById('addItemBtn').disabled = false;
+  document.getElementById('addItemBtnMobile').disabled = false;
   document.getElementById('signOutBtn').disabled = false;
   document.getElementById('passwordInput').disabled = true;
   document.getElementById('signUpBtn').disabled = true;
@@ -112,6 +113,7 @@ function disableAppFeatures() {
   document.getElementById('createListBtn').disabled = true;
   document.getElementById('groupSelect').disabled = true;
   document.getElementById('addItemBtn').disabled = true;
+  document.getElementById('addItemBtnMobile').disabled = true;
   document.getElementById('passwordInput').disabled = false;
   document.getElementById('signUpBtn').disabled = false;
   document.getElementById('signInBtn').disabled = false;
@@ -122,7 +124,7 @@ function disableAppFeatures() {
   updateEmptyState(false, false);
 
   // Reset topbar
-  document.getElementById('activeListTitle').textContent = 'My Shopping List';
+  document.getElementById('activeListTitle').textContent = 'No active list!';
   document.getElementById('activeListSubtitle').textContent = 'Select a list from the sidebar';
 }
 
@@ -135,10 +137,22 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
     showUserInfo(session.user);
     enableAppFeatures();
     loadGroups();
+    // Close sidebar on mobile after login
+    if (window.innerWidth <= 700) {
+      document.getElementById('sidebar').classList.remove('sidebar-open');
+      document.getElementById('sidebarBackdrop').classList.remove('backdrop-visible');
+      document.body.style.overflow = '';
+    }
   } else {
     console.log('🔒 No user logged in');
     showUserInfo(null);
     disableAppFeatures();
+    // Auto-open sidebar on mobile so auth form is visible
+    if (window.innerWidth <= 700) {
+      document.getElementById('sidebar').classList.add('sidebar-open');
+      document.getElementById('sidebarBackdrop').classList.add('backdrop-visible');
+      document.body.style.overflow = 'hidden';
+    }
   }
 });
 
@@ -341,7 +355,7 @@ async function deleteListGroup(listId, listName) {
     if (activeListId === listId) {
       activeListId = null;
       document.getElementById('list').innerHTML = '';
-      document.getElementById('activeListTitle').textContent = 'My Shopping List';
+      document.getElementById('activeListTitle').textContent = 'No active list!';
       document.getElementById('activeListSubtitle').textContent = 'Select a list from the sidebar';
       updateEmptyState(false, false);
     }
@@ -350,13 +364,45 @@ async function deleteListGroup(listId, listName) {
 }
 
 // =============================================
+// MOBILE vs DESKTOP INPUT HELPERS
+// =============================================
+function isMobile() {
+  return window.innerWidth <= 700;
+}
+
+function getInputVal(desktopId, mobileId) {
+  return isMobile()
+    ? document.getElementById(mobileId).value
+    : document.getElementById(desktopId).value;
+}
+
+function clearAddInputs() {
+  ['itemInput','countInput','priceInput'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = id === 'countInput' ? '1' : '';
+  });
+  ['itemInputMobile','countInputMobile','priceInputMobile'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = id === 'countInputMobile' ? '1' : '';
+  });
+}
+
+// =============================================
 // ADD ITEM
 // =============================================
 async function addItem() {
-  const itemName = document.getElementById('itemInput').value.trim();
-  const category = document.getElementById('categoryInput').value;
-  const count = parseInt(document.getElementById('countInput').value) || 1;
-  const price = parseFloat(document.getElementById('priceInput').value) || null;
+  const itemName = isMobile()
+    ? document.getElementById('itemInputMobile').value.trim()
+    : document.getElementById('itemInput').value.trim();
+  const category = isMobile()
+    ? document.getElementById('categoryInputMobile').value
+    : document.getElementById('categoryInput').value;
+  const count = parseInt(isMobile()
+    ? document.getElementById('countInputMobile').value
+    : document.getElementById('countInput').value) || 1;
+  const price = parseFloat(isMobile()
+    ? document.getElementById('priceInputMobile').value
+    : document.getElementById('priceInput').value) || null;
   const listId = document.getElementById('groupSelect').value;
 
   if (!listId) {
@@ -386,9 +432,7 @@ async function addItem() {
     console.log(`✅ Item "${itemName}" added:`, data);
     showToast(`"${itemName}" added!`, 'success');
     // Clear inputs
-    document.getElementById('itemInput').value = '';
-    document.getElementById('countInput').value = '1';
-    document.getElementById('priceInput').value = '';
+    clearAddInputs();
     // Auto-refresh the list
     fetchList(listId);
   }
@@ -546,6 +590,12 @@ window.onload = async () => {
     console.log('🔒 No user logged in on page load');
     showUserInfo(null);
     disableAppFeatures();
+    // Auto-open sidebar on mobile so auth form is visible
+    if (window.innerWidth <= 700) {
+      document.getElementById('sidebar').classList.add('sidebar-open');
+      document.getElementById('sidebarBackdrop').classList.add('backdrop-visible');
+      document.body.style.overflow = 'hidden';
+    }
   }
 };
 
@@ -553,12 +603,20 @@ window.onload = async () => {
 // EVENT LISTENERS
 // =============================================
 document.getElementById('groupSelect').addEventListener('change', function () {
-  document.getElementById('addItemBtn').disabled = !this.value;
+  const hasVal = !!this.value;
+  document.getElementById('addItemBtn').disabled = !hasVal;
+  document.getElementById('addItemBtnMobile').disabled = !hasVal;
 });
 
 document.getElementById('createListBtn').addEventListener('click', createListGroup);
 document.getElementById('addItemBtn').addEventListener('click', addItem);
+document.getElementById('addItemBtnMobile').addEventListener('click', addItem);
 document.getElementById('signUpBtn').addEventListener('click', signUp);
 document.getElementById('signInBtn').addEventListener('click', signIn);
 document.getElementById('signOutBtn').addEventListener('click', signOut);
+
+// Allow Enter key on mobile item input
+document.getElementById('itemInputMobile').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') addItem();
+});
 

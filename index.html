@@ -90,6 +90,13 @@
     <!-- ===== MAIN ===== -->
     <main class="main">
 
+      <!-- Floating sidebar pull tab (mobile only) -->
+      <button class="sidebar-pull-tab" id="sidebarPullTab" aria-label="Toggle menu">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M5 2l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
       <div class="topbar">
         <!-- Hamburger (mobile only) -->
         <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">
@@ -99,12 +106,13 @@
           <h1 class="page-title" id="activeListTitle">Create your custom list!</h1>
           <p class="page-subtitle" id="activeListSubtitle">Select a list from the sidebar</p>
         </div>
-        <select id="groupSelect" disabled class="select-styled">
+        <select id="groupSelect" disabled class="select-styled topbar-select">
           <option value="">— Select a list —</option>
         </select>
       </div>
 
-      <div class="add-item-bar">
+      <!-- Desktop add-item bar (hidden on mobile) -->
+      <div class="add-item-bar add-item-bar-desktop">
         <input id="itemInput" type="text" placeholder="Add an item…" class="flex-grow">
         <select id="categoryInput" class="select-styled">
           <option value="Grocery">🛒 Grocery</option>
@@ -146,7 +154,7 @@
           </svg>
         </div>
         <p class="empty-title">This list is empty</p>
-        <p class="empty-sub">Add your first item using the bar above.</p>
+        <p class="empty-sub">Add your first item using the bar below.</p>
       </div>
 
       <!-- No list selected state -->
@@ -159,6 +167,26 @@
         </div>
         <p class="empty-title">No list selected</p>
         <p class="empty-sub">Pick a list from the sidebar or create a new one.</p>
+      </div>
+
+      <!-- ===== MOBILE STICKY ADD BAR (bottom) ===== -->
+      <div class="mobile-add-bar" id="mobileAddBar">
+        <div class="mobile-add-row-main">
+          <input id="itemInputMobile" type="text" placeholder="Add an item…" class="flex-grow">
+          <button id="addItemBtnMobile" class="btn btn-accent" disabled>Add</button>
+        </div>
+        <div class="mobile-add-row-extra">
+          <select id="categoryInputMobile" class="select-styled">
+            <option value="Grocery">🛒 Grocery</option>
+            <option value="Shopping">🛍️ Shopping</option>
+            <option value="To Buy">📦 To Buy</option>
+            <option value="Dine-in">🍽️ Dine-in</option>
+            <option value="Take-outs">🥡 Take-outs</option>
+            <option value="Custom">✏️ Custom</option>
+          </select>
+          <input id="countInputMobile" type="number" placeholder="Qty" min="1" value="1" class="input-narrow">
+          <input id="priceInputMobile" type="number" placeholder="Price" step="0.01" class="input-narrow">
+        </div>
       </div>
 
     </main>
@@ -183,13 +211,57 @@
       document.body.style.overflow = '';
     }
 
+    const pullTab = document.getElementById('sidebarPullTab');
+
+    function toggleSidebar() {
+      if (sidebar.classList.contains('sidebar-open')) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    }
+
+    function updatePullTab() {
+      const isOpen = sidebar.classList.contains('sidebar-open');
+      pullTab.classList.toggle('sidebar-open', isOpen);
+    }
+
+    const _origOpen = openSidebar;
+    const _origClose = closeSidebar;
+    openSidebar = function() { _origOpen(); updatePullTab(); }
+    closeSidebar = function() { _origClose(); updatePullTab(); }
+
     hamburgerBtn.addEventListener('click', openSidebar);
     closeBtn.addEventListener('click', closeSidebar);
     backdrop.addEventListener('click', closeSidebar);
+    pullTab.addEventListener('click', (e) => { e.stopPropagation(); toggleSidebar(); });
 
     // Close sidebar when a group tab is clicked on mobile
     document.getElementById('groupTabs').addEventListener('click', (e) => {
       if (window.innerWidth <= 700 && e.target.closest('.group-tab')) {
+        closeSidebar();
+      }
+    });
+
+    // Close sidebar when a list is selected from dropdown (mobile)
+    document.getElementById('groupSelect').addEventListener('change', function () {
+      if (window.innerWidth <= 700 && this.value) {
+        closeSidebar();
+      }
+    });
+
+    // Failsafe: always reset body overflow and sidebar state on resize
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 700) {
+        document.body.style.overflow = '';
+        sidebar.classList.remove('sidebar-open');
+        backdrop.classList.remove('backdrop-visible');
+      }
+    });
+
+    // Failsafe: close sidebar on navigation (main area click for mobile)
+    document.querySelector('.main').addEventListener('click', () => {
+      if (window.innerWidth <= 700 && sidebar.classList.contains('sidebar-open')) {
         closeSidebar();
       }
     });

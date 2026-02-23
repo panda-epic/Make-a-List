@@ -450,7 +450,7 @@ async function fetchList(listId) {
       <button class="item-delete-btn" title="Remove item">✕</button>
     `;
     li.querySelector('.item-delete-btn').addEventListener('click', () => {
-      deleteItem(item.id, item.item_name, item.listId);
+      deleteItem(item.item_id, item.item_name, item.listId);
     });
     listElement.appendChild(li);
   });

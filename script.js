@@ -410,7 +410,7 @@ async function deleteItem(itemId, itemName, listId) {
     console.log('✅ Item deleted:', itemId);
     showToast(`"${itemName}" removed.`, 'info');
     currentListId = item.list_id;
-    fetchList(currentListId);
+    fetchList();
   }
 }
 

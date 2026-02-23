@@ -561,3 +561,4 @@ document.getElementById('addItemBtn').addEventListener('click', addItem);
 document.getElementById('signUpBtn').addEventListener('click', signUp);
 document.getElementById('signInBtn').addEventListener('click', signIn);
 document.getElementById('signOutBtn').addEventListener('click', signOut);
+
